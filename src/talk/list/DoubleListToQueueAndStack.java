@@ -1,6 +1,5 @@
 package talk.list;
 
-import sun.plugin2.gluegen.runtime.StructAccessor;
 
 import java.util.ArrayList;
 import java.util.List;

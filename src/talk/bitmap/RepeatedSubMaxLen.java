@@ -1,4 +1,4 @@
-package talk;
+package talk.bitmap;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
