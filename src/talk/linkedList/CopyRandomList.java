@@ -1,6 +1,4 @@
 package talk.linkedList;
-
-import java.sql.SQLOutput;
 import java.util.HashMap;
 
 public class CopyRandomList {

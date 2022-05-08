@@ -1,4 +1,4 @@
-package talk.list;
+package talk.linkedList.list;
 
 import java.util.Stack;
 

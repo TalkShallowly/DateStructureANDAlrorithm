@@ -1,4 +1,4 @@
-package talk.list;
+package talk.linkedList.list;
 
 
 import java.util.ArrayList;
@@ -6,27 +6,31 @@ import java.util.List;
 import java.util.Stack;
 
 /**
- * 使用双端链表实现队列和栈
+ *  使用链币实现队列和栈
+ *      1）：Queue ----> FIFO模型
+ *      2）：Stack ----> LIFO模型
  * @author talkshallowly
  */
-public class DoubleListToQueueAndStack {
-    public static class DoubleList<E>{
-        E data;
-        DoubleList pre;
-        DoubleList next;
-        DoubleList(E data){
-            this.data = data;
-        }
+public class LinkedListToQueueAndStack {
+    public static class ListNode<T> {
+        T data;
+        ListNode next;
+        ListNode(T val) { this.data = val; }
     }
 
     /**
-     *  与单向链表原理相似
+     * 根据链表的头尾节点来实现
      * @param <V>
      */
     public static class MyQueue<V>{
-        private DoubleList head;
-        private DoubleList tail;
+        private ListNode<V> head;
+        private ListNode<V> tail;
         private int size;
+        MyQueue(){
+            head = null;
+            tail = null;
+            size = 0;
+        }
         public boolean isEmpty(){
             return size == 0;
         }
@@ -34,111 +38,86 @@ public class DoubleListToQueueAndStack {
             return size;
         }
         public V offer(V value){
-            DoubleList currentNode = new DoubleList(value);
-            if (tail != null) {
-                tail.next = currentNode;
-                tail = tail.next;
+            ListNode<V> cur = new ListNode<>(value);
+            if (tail == null){
+                head = cur;
+                tail = cur;
             }else {
-                head = currentNode;
-                tail = currentNode;
+                tail.next = cur;
+                tail = tail.next;
             }
             size++;
             return value;
         }
 
+        /**
+         * 返回第一个元素（不删除）
+         * @return
+         */
         public V peek(){
-            return head != null ? (V) head.data : null;
+            if (head != null){
+                return head.data;
+            }
+            return null;
         }
-        public V poll(){
+
+        /**
+         * 删除第一个元素
+         * @return
+         */
+        public V poll() {
             V ans = null;
-            if (head == null){
-                return ans;
-            }else {
-                ans = (V)head.data;
+            if (head != null) {
+                ans = head.data;
                 head = head.next;
+                size--;
+            }
+            if (head == null){
+                tail = null;
             }
             return ans;
         }
     }
 
     /**
-     * 双端链表：头节点做插入，尾节点取数据
+     * 可以每次移动头节点来实现元素的移动
      * @param <V>
      */
-    public static class DoubleListToStack<V>{
-        private DoubleList head;
-        private DoubleList tail;
+    public static class MyStack<V>{
+        private ListNode<V> head;
         private int size;
+        MyStack(){
+            head = null;
+            size = 0;
+        }
         public boolean isEmpty(){
             return size == 0;
         }
         public int size(){
             return size;
         }
-        //从头部添加，移动头部为栈顶
-        public V pushHead(V value){
-            DoubleList currentNode = new DoubleList(value);
-            if (head == null){
-                head = currentNode;
-                tail = currentNode;
-            }else {
-                currentNode.next = head;
-                head.pre = currentNode;
-                head = head.next;
+
+        public V push(V value){
+            ListNode<V> cur = new ListNode<>(value);
+            if (head != null) {
+                cur.next = head;
             }
+            head = cur;
             size++;
             return value;
         }
 
-        //从尾部添加
-        public V pushTail(V value){
-            DoubleList currentNode = new DoubleList(value);
-            if (tail == null){
-                head = currentNode;
-            }else {
-                tail.next = currentNode;
-                currentNode.pre = tail;
-            }
-            tail = currentNode;
-            size++;
-            return value;
-        }
         public V peek(){
-            return tail == null ? null : (V)tail.data;
+            return head == null ? null : head.data;
         }
-        //从头部删除
-        public V popHead(){
+        public V pop(){
             V ans = null;
-            if (head == null){
-                return ans;
-            }
-            ans = (V)head.data;
-            if (tail == head){
-                tail = null;
-                head = null;
-            }else {
+            if (head != null){
+                ans = head.data;
                 head = head.next;
-                head.pre = null;
             }
             size--;
             return ans;
-        }
-        //从尾部删除
-        public V popTail(){
-            V ans = null;
-            if (tail == null){
-                return ans;
-            }
-            ans = (V)tail.data;
-            if (tail == head){
-                tail = null;
-                head = null;
-            }else {
-                tail = tail.pre;
-                tail.next = null;
-            }
-            size--;
-            return  ans;
         }
     }
 
@@ -218,40 +197,39 @@ public class DoubleListToQueueAndStack {
     }
 
     public static void checkStack(int len,int value){
-        DoubleListToStack<Integer> doubleListToStack = new DoubleListToStack();
+        MyStack<Integer> myStack = new MyStack();
         TestMyStack<Integer> testMyStack = new TestMyStack();
         double random = Math.random();
         if (random < 0.33){
-            int num1 = doubleListToStack.pushTail(value);
+            int num1 = myStack.push(value);
             int num2 = testMyStack.push(value);
             if (num1 != num2){
                 System.out.println("error....stack..   offer");
             }
         }else if (random < 0.66){
-            if (!doubleListToStack.isEmpty()){
-                int num1 = doubleListToStack.popTail();
+            if (!myStack.isEmpty()){
+                int num1 = myStack.pop();
                 int num2 = testMyStack.pop();
                 if (num1 != num2){
                     System.out.println("error....stack..   peek");
                 }
             }
         }else {
-            if (!doubleListToStack.isEmpty()){
-                int num1 = doubleListToStack.peek();
+            if (!myStack.isEmpty()){
+                int num1 = myStack.peek();
                 int num2 = testMyStack.peek();
                 if (num1 != num2){
                     System.out.println("error....queue..   peek");
                 }
             }
         }
-        if (doubleListToStack.size != testMyStack.size()){
+        if (myStack.size != testMyStack.size()){
             System.out.println("error....size");
         }
-        if (doubleListToStack.isEmpty() != testMyStack.isEmpty()){
+        if (myStack.isEmpty() != testMyStack.isEmpty()){
             System.out.println("error.. isEmpty");
         }
     }
-
 
     public static void main(String[] args) {
         int testTime = 200000;
@@ -269,4 +247,5 @@ public class DoubleListToQueueAndStack {
         }
         System.out.println("测试Stack结束");
     }
+
 }

@@ -1,96 +1,74 @@
-package talk.list;
-
+package talk.linkedList.list;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
 import java.util.Stack;
-import java.util.concurrent.ArrayBlockingQueue;
 
 /**
- *  使用链币实现队列和栈
- *      1）：Queue ----> FIFO模型
- *      2）：Stack ----> LIFO模型
+ * 使用数组实现队列和栈
  * @author talkshallowly
  */
-public class LinkedListToQueueAndStack {
-    public static class ListNode<T> {
-        T data;
-        ListNode next;
-        ListNode(T val) { this.data = val; }
-    }
-
-    /**
-     * 根据链表的头尾节点来实现
-     * @param <V>
-     */
-    public static class MyQueue<V>{
-        private ListNode<V> head;
-        private ListNode<V> tail;
+public class ArrayToQueueAndStack {
+    public static class ArrayToQueue{
+        private int[] ints;
+        private final int limitLen;
+        private int start;
+        private int end;
         private int size;
-        MyQueue(){
-            head = null;
-            tail = null;
+        ArrayToQueue(int length){
+            ints = new int[length];
+            this.limitLen = length;
+            start = 0;
+            end = 0;
             size = 0;
         }
-        public boolean isEmpty(){
-            return size == 0;
-        }
-        public int size(){
+        public int size() {
             return size;
         }
-        public V offer(V value){
-            ListNode<V> cur = new ListNode<>(value);
-            if (tail == null){
-                head = cur;
-                tail = cur;
+        public boolean isEmpty() {
+            return size == 0;
+        }
+        public int offer(int value){
+            if (size >= limitLen){
+                throw new RuntimeException("队列已满，无法添加");
             }else {
-                tail.next = cur;
-                tail = tail.next;
+                if (end >= limitLen) {
+                    end = 0;
+                }
+                ints[end++] = value;
+                size++;
             }
-            size++;
             return value;
         }
-
-        /**
-         * 返回第一个元素（不删除）
-         * @return
-         */
-        public V peek(){
-            if (head != null){
-                return head.data;
+        public int peek(){
+            if (start >= limitLen){
+                start = 0;
             }
-            return null;
+            return ints[start];
         }
-
-        /**
-         * 删除第一个元素
-         * @return
-         */
-        public V poll() {
-            V ans = null;
-            if (head != null) {
-                ans = head.data;
-                head = head.next;
+        public int poll(){
+            int ans = 0;
+            if (size != 0){
+                if (start >= limitLen) {
+                    start = 0;
+                }
+                ans = ints[start++];
                 size--;
-            }
-            if (head == null){
-                tail = null;
+            }else {
+                throw new RuntimeException("队列已空，无法删除");
             }
             return ans;
         }
     }
 
-    /**
-     * 可以每次移动头节点来实现元素的移动
-     * @param <V>
-     */
-    public static class MyStack<V>{
-        private ListNode<V> head;
+    public static class ArrayToStack{
+        private int[] arr;
+        private int index;
         private int size;
-        MyStack(){
-            head = null;
-            size = 0;
+        private final int limitLength;
+        ArrayToStack(int length){
+            this.limitLength = length;
+            arr = new int[length];
         }
         public boolean isEmpty(){
             return size == 0;
@@ -99,27 +77,23 @@ public class LinkedListToQueueAndStack {
             return size;
         }
 
-        public V push(V value){
-            ListNode<V> cur = new ListNode<>(value);
-            if (head != null) {
-                cur.next = head;
+        public int push(int value){
+            if (size >= limitLength){
+                throw new RuntimeException("栈空间已满，无法放入！");
             }
-            head = cur;
+            arr[index++] = value;
             size++;
             return value;
         }
-
-        public V peek(){
-            return head == null ? null : head.data;
+        public int peek(){
+            return arr[index-1];
         }
-        public V pop(){
-            V ans = null;
-            if (head != null){
-                ans = head.data;
-                head = head.next;
+        public int pop(){
+            if (size == 0){
+                throw new RuntimeException("栈内无任何数据，请先添加！");
             }
             size--;
-            return ans;
+            return arr[--index];
         }
     }
 
@@ -164,90 +138,85 @@ public class LinkedListToQueueAndStack {
     }
 
     public static void checkQueue(int len,int value){
-        MyQueue<Integer> myQueue = new MyQueue();
+        ArrayToQueue arrayToQueue = new ArrayToQueue(len);
         TestMyQueue<Integer> test = new TestMyQueue();
         double random = Math.random();
         if (random < 0.33){
-            int num1 = myQueue.offer(value);
+            int num1 = arrayToQueue.offer(value);
             int num2 = test.offer(value);
             if (num1 != num2){
                 System.out.println("error....queue..   offer");
             }
         }else if (random < 0.66){
-            if (!myQueue.isEmpty()){
-                int num1 = myQueue.poll();
+            if (!arrayToQueue.isEmpty()){
+                int num1 = arrayToQueue.poll();
                 int num2 = test.poll();
                 if (num1 != num2){
                     System.out.println("error....queue..   peek");
                 }
             }
         }else {
-            if (!myQueue.isEmpty()){
-                int num1 = myQueue.peek();
+            if (!arrayToQueue.isEmpty()){
+                int num1 = arrayToQueue.peek();
                 int num2 = test.peek();
                 if (num1 != num2){
                     System.out.println("error....queue..   peek");
                 }
             }
         }
-        if (myQueue.isEmpty() != test.isEmpty()){
+        if (arrayToQueue.isEmpty() != test.isEmpty()){
             System.out.println("error....queue...... isEmpty");
         }
-        if (myQueue.size != test.size()){
+        if (arrayToQueue.size != test.size()){
             System.out.println("error...queue......size");
         }
     }
 
     public static void checkStack(int len,int value){
-        MyStack<Integer> myStack = new MyStack();
+        ArrayToStack arrayToStack = new ArrayToStack(len);
         TestMyStack<Integer> testMyStack = new TestMyStack();
         double random = Math.random();
         if (random < 0.33){
-            int num1 = myStack.push(value);
+            int num1 = arrayToStack.push(value);
             int num2 = testMyStack.push(value);
             if (num1 != num2){
                 System.out.println("error....stack..   offer");
             }
         }else if (random < 0.66){
-            if (!myStack.isEmpty()){
-                int num1 = myStack.pop();
+            if (!arrayToStack.isEmpty()){
+                int num1 = arrayToStack.pop();
                 int num2 = testMyStack.pop();
                 if (num1 != num2){
                     System.out.println("error....stack..   peek");
                 }
             }
         }else {
-            if (!myStack.isEmpty()){
-                int num1 = myStack.peek();
+            if (!arrayToStack.isEmpty()){
+                int num1 = arrayToStack.peek();
                 int num2 = testMyStack.peek();
                 if (num1 != num2){
                     System.out.println("error....queue..   peek");
                 }
             }
         }
-        if (myStack.size != testMyStack.size()){
+        if (arrayToStack.size != testMyStack.size()){
             System.out.println("error....size");
         }
-        if (myStack.isEmpty() != testMyStack.isEmpty()){
+        if (arrayToStack.isEmpty() != testMyStack.isEmpty()){
             System.out.println("error.. isEmpty");
         }
     }
 
     public static void main(String[] args) {
-        int testTime = 200000;
-        int len = 10000;
-        int value = 500000;
+        int testTime = 50000;
         System.out.println("测试队列开始");
         for (int i = 0; i < testTime; i++) {
-            checkQueue(len,value);
+            int len = (int) (Math.random() * 1000) + 1;
+            for (int j = 0; j < len; j++) {
+                checkQueue(len, (int) (Math.random() * 1000) + 1);
+                checkStack(len, (int) (Math.random() * 1000) + 1);
+            }
         }
         System.out.println("测试队列结束");
-
-        System.out.println("测试Stack开始");
-        for (int i = 0; i < testTime; i++) {
-            checkStack(len,value);
-        }
-        System.out.println("测试Stack结束");
     }
-
 }
