@@ -1,6 +1,7 @@
 package talk.linkedList;
 
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 题目：
@@ -22,4 +23,78 @@ import java.util.HashSet;
  */
 public class FindFirstIntersectNode {
 
+    public static class Node{
+        private int value;
+        private Node next;
+        public Node(int data){
+            this.value = data;
+            next = null;
+        }
+    }
+
+    public Node intersectNode_Container(Node head1, Node head2){
+        Set<Node> set = new HashSet<>();
+        Node cur = head1;
+        int len = 0;
+        while (cur != null){
+            if (set.contains(cur)){
+                break;
+            }
+            len++;
+            set.add(cur);
+            cur = cur.next;
+        }
+        cur = head2;
+        while (cur != null){
+            if (set.contains(cur)){
+                return cur;
+            }
+            cur = cur.next;
+        }
+        return null;
+
+    }
+
+    private Node isLoopList(Node head){
+        if (head == null || head.next == null){
+            return null;
+        }
+        Node fastNode = head;
+        Node slowNode = head;
+        while (fastNode != null){
+            if (fastNode.next == null || fastNode.next.next == null){
+                return null;
+            }
+            fastNode = fastNode.next.next;
+            slowNode = slowNode.next;
+            if (fastNode == slowNode){
+                break;
+            }
+        }
+        fastNode = head;
+        if (fastNode == slowNode){
+            return slowNode;
+        }else {
+            while (fastNode != slowNode){
+                fastNode = fastNode.next;
+                slowNode = slowNode.next;
+            }
+        }
+        return slowNode;
+    }
+
+    public static void main(String[] args) {
+        Node node = new Node(3);
+        Node node1 = new Node(2);
+        Node node2 = new Node(1);
+        Node node3 = new Node(0);
+        Node node4 = new Node(-1);
+        node.next = node1;
+        node1.next = node2;
+        node2.next = node3;
+        node3.next = node4;
+        node4.next = node3;
+        FindFirstIntersectNode findFirstIntersectNode = new FindFirstIntersectNode();
+        System.out.println(findFirstIntersectNode.isLoopList(node).value);
+    }
 }
