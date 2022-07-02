@@ -1,6 +1,9 @@
 package talk.linkedList;
 import java.util.HashMap;
 
+/**
+ * 题目：一个链表有两个指针 一个 next指针， 一个Random指针 ， 其中next指针指向下一个节点， Random指针指向随机节点，请完成此链表的拷贝
+ */
 public class CopyRandomList {
 
     public static class Node{

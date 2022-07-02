@@ -31,7 +31,6 @@ public class IsFull {
         if (root == null) {
             return 0;
         }
-        int result = 0;
         return Math.max(maxDepth(root.leftNode), maxDepth(root.rightNode)) + 1;
     }
 
