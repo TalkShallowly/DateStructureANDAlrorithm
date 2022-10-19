@@ -6,7 +6,7 @@ import java.util.HashMap;
 /**
  * 位运算
  */
-public class Code_04_BitOperation {
+public class BitOperation {
 
     /**
      * 在一个数组中只有一个数出现了奇数次，其他的数出现了偶数次，打印此出现奇数次的数？

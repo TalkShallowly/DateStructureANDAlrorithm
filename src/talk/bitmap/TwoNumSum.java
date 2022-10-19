@@ -14,7 +14,7 @@ import java.util.Arrays;
  * 输出：[0,1]
  * 解释：因为 nums[0] + nums[1] == 9 ，返回 [0, 1] 。
  */
-public class Code_03_TwoNumSum {
+public class TwoNumSum {
 
     public static int[] two_NumSum(int[] nums, int target){
         int startIndex = 0;

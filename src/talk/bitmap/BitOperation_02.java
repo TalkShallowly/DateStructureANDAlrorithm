@@ -6,7 +6,7 @@ import java.util.*;
  * @author talkshallowly
  * 问题：在一个数组中，有一个数出现了K次，其他数出现了M次，打印出现了K次的数（M>0,M>K）
  */
-public class Code_04_BitOperation_02 {
+public class BitOperation_02 {
 
     public static int findNum(int[] arr,int m){
         if (arr == null || arr.length < 2){

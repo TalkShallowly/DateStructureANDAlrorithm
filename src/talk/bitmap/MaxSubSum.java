@@ -5,7 +5,7 @@ package talk.bitmap;
  * 最大子序列问题
  * @author talkshallowly
  */
-public class Code02_MaxSubSum {
+public class MaxSubSum {
 
     public static int maxSubSum01(int[] arr){
         int maxSum = 0;

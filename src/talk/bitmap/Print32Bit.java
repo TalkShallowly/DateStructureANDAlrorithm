@@ -3,7 +3,7 @@ package talk.bitmap;
 /**
  * 位运算
  */
-public class Code01 {
+public class Print32Bit {
     public static void main(String[] args) {
         int num = 4;
         print(num);
