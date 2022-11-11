@@ -5,7 +5,6 @@ import java.util.Map;
 
 /**
  * 前缀树实现
- * @author talkshallowly
  */
 public class TrieTreeImplement {
     public static class Node1{
@@ -35,7 +34,7 @@ public class TrieTreeImplement {
             char[] chars = word.toCharArray();
             //第二部： 记录根节点，
             Node1 node = root;
-            //从根结点开始白标记，共有几条来来链路
+            //从根结点开始白标记，共有几条链路
             node.pass++;
             int index = 0;
             //从左向有右遍历字符集
@@ -145,11 +144,7 @@ public class TrieTreeImplement {
             }
         }
         public int search(String word){
-            if (map.containsKey(word)){
-                return map.get(word);
-            }else {
-                return 0;
-            }
+            return map.getOrDefault(word, 0);
         }
 
         public int prefixNumber(String str){
