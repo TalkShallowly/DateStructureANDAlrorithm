@@ -1,5 +1,7 @@
 package talk.recursion;
 
+import java.util.Arrays;
+
 /**
  * //荷兰国旗问提（快排核心流程）
  * @author talkshallowly
@@ -26,14 +28,18 @@ public class DutchFlag {
         if (left == right){
             return left;
         }
+        //定义一个左边界
         int flax = left - 1;
         int index = left;
         while (index <= right){
+            //设置最后一个位置的数为 基数
             if (arr[index] <= arr[right]){
+                //如果小于,则将当前位置的数据 归放到边界中
                 swap(arr,index,++flax);
             }
             index++;
         }
+        //最后交换边界后面一个数据的位置和基数的位置
         swap(arr, ++flax, right);
         return flax;
     }
