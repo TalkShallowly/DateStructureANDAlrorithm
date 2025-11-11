@@ -2,6 +2,7 @@ package talk.sequence_table.skip_list;
 
 import java.util.ArrayList;
 
+
 /**
  * 跳跃表实现:
  */
@@ -34,25 +35,70 @@ public class SkipListImpl {
 
     }
 
-    public class SkipListMap<K extends Comparable<K>, V>{
+    public static class SkipListMap<K extends Comparable<K>, V>{
 
         private static final double PROBABILITY = 0.5;
         private SkipListNode<K,V> head;
         private int size;
         private int maxLevel;
 
+        public SkipListMap() {
+            head = new SkipListNode<>(null, null);
+            head.nextNodes.add(null); // 0
+            size = 0;
+            maxLevel = 0;
+        }
 
-        public SkipListNode<K,V> get (K key){
+        public V get(K key) {
             if (key == null) {
                 return null;
             }
-            SkipListNode<K, V> kvSkipListNode = mostRightLessNodeInTree(key).nextNodes.get(0);
-            if (kvSkipListNode != null && kvSkipListNode.isKeyEqual(key)) {
-                return kvSkipListNode;
-            }
-            return null;
+            SkipListNode<K, V> less = mostRightLessNodeInTree(key);
+            SkipListNode<K, V> next = less.nextNodes.get(0);
+            return next != null && next.isKeyEqual(key) ? next.value : null;
         }
 
+        //返回小于等于当前key的数据
+        public K floorKey(K key) {
+            if (key == null) {
+                return null;
+            }
+            SkipListNode<K, V> less = mostRightLessNodeInTree(key);
+            SkipListNode<K, V> next = less.nextNodes.get(0);
+            return next != null && next.isKeyEqual(key) ? next.key : less.key;
+        }
+
+
+        //返回大于当前key的数据
+        public K ceilingKey(K key) {
+            if (key == null) {
+                return null;
+            }
+            SkipListNode<K, V> next = mostRightLessNodeInTree(key).nextNodes.get(0);
+            return next != null ? next.key : null;
+        }
+
+        //返回最小的key
+        public K firstKey() {
+            return head.nextNodes.get(0) == null ? null : head.nextNodes.get(0).key;
+        }
+
+        //返回最大的key
+        public K lastKey() {
+            int curLevel = maxLevel;
+            SkipListNode<K, V> curNode = head;
+
+            //逐级往下跳跃
+            while (curLevel >= 0){
+                //获取当前层级的最右数据
+                while (curNode.nextNodes.get(curLevel) != null) {
+                    curNode = curNode.nextNodes.get(curLevel);
+                }
+                curLevel--;
+            }
+            return curNode.key;
+        }
+//
         public void put (K key, V value){
             if (key == null) {
                 return;
@@ -61,7 +107,12 @@ public class SkipListImpl {
         }
 
         public boolean containsKey (K key){
-            return get(key) != null;
+            if (key == null) {
+                return false;
+            }
+            SkipListNode<K, V> less = mostRightLessNodeInTree(key);
+            SkipListNode<K, V> next = less.nextNodes.get(0);
+            return next != null && next.isKeyEqual(key);
         }
 
         public int size(){
@@ -123,16 +174,15 @@ public class SkipListImpl {
                 for (int i = 0; i <= newNodeLevel; i++) {
                     newNode.nextNodes.add(null);
                 }
-
                 //从最高层开始 链接新节点
                 int curLevel = maxLevel;
-                SkipListNode<K, V> curNode;
+                SkipListNode<K, V> pre = head;
                 while (curLevel >= 0) {
-                    curNode = mostRightLessNodeInLevel(head, key, curLevel);
+                    pre = mostRightLessNodeInLevel(pre, key, curLevel);
                     //非当前节点层级跳过
-                    if (curLevel >= newNodeLevel) {
-                        newNode.nextNodes.set(curLevel, curNode.nextNodes.get(curLevel));
-                        curNode.nextNodes.set(curLevel, newNode);
+                    if (curLevel <= newNodeLevel) {
+                        newNode.nextNodes.set(curLevel, pre.nextNodes.get(curLevel));
+                        pre.nextNodes.set(curLevel, newNode);
                     }
                     curLevel--;
                 }
@@ -140,7 +190,7 @@ public class SkipListImpl {
         }
 
 
-        //返回整棵树上小于当前key的最右节点，相当于0层的小于Key最右节点
+//        返回整棵树上小于当前key的最右节点，相当于0层的小于Key最右节点
         private SkipListNode<K,V> mostRightLessNodeInTree(K key) {
             SkipListNode<K,V> curNode = head;
             int curLevel = maxLevel;
@@ -156,7 +206,7 @@ public class SkipListImpl {
             SkipListNode<K, V> nextNode = curNode.nextNodes.get(level);
             while (nextNode != null && nextNode.isKeyLess(key)) {
                 curNode = nextNode;
-                nextNode = nextNode.nextNodes.get(level);
+                nextNode = curNode.nextNodes.get(level);
             }
             return curNode;
         }

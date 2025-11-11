@@ -27,43 +27,55 @@ public class AvlTreeImpl {
         }
     }
 
-    public class AvlTreeMap <K extends Comparable<K>,V> {
+    public static class AvlTreeMap <K extends Comparable<K>,V> {
 
         public AvlNode<K,V> root;
         public int size;
 
         //查询
-        public AvlNode<K,V> get(K key) {
-            if (size == 0) {
+        public V get(K key) {
+            if (key == null) {
                 return null;
             }
-            return get(root,key);
+            AvlNode<K, V> lastIndex = findLastIndex(key);
+            return lastIndex != null && key.compareTo(lastIndex.key) == 0 ? lastIndex.value : null;
         }
 
         //添加
         public void put(K key, V value) {
             if (key == null) {
-               return;
+                return;
             }
-            AvlNode<K, V> kvAvlNode = get(root, key);
-            if (kvAvlNode != null) {
-                kvAvlNode.value = value;
-            }else {
-                root = add(root,key,value);
+            AvlNode<K, V> lastNode = findLastIndex(key);
+            if (lastNode != null && key.compareTo(lastNode.key) == 0) {
+                lastNode.value = value;
+            } else {
                 size++;
+                root = add(root, key, value);
             }
         }
 
         //删除
         public void remove(K key) {
-            AvlNode<K, V> kvAvlNode = get(root, key);
-            if (kvAvlNode != null) {
-                delete(root,key);
+            if (key == null) {
+                return;
+            }
+            if (containsKey(key)) {
                 size--;
+                root = delete(root,key);
             }
         }
 
+        public boolean containsKey(K key){
+            if (key == null) {
+                return false;
+            }
+            AvlNode<K, V> lastIndex = findLastIndex(key);
+            return lastIndex != null && key.compareTo(lastIndex.key) == 0;
+        }
 
+
+//        查询最后一个匹配节点
         public AvlNode<K,V> findLastIndex(K key){
             AvlNode<K, V> pre = root;
             AvlNode<K, V> cur = root;
@@ -117,20 +129,13 @@ public class AvlTreeImpl {
         }
 
 
-        public boolean contains(K key) {
-            if (key == null || size == 0) {
-                return false;
-            }
-            return get(root, key) != null;
-        }
-
         public int size() {
             return size;
         }
 
         //返回最小的 Key
         public K firstKey() {
-            if (size == 0) {
+            if (root == null) {
                 return null;
             }
             AvlNode<K,V> first = root;
@@ -142,7 +147,7 @@ public class AvlTreeImpl {
 
         //返回最大的key
         public K lastKey(){
-            if (size == 0) {
+            if (root == null) {
                 return null;
             }
             AvlNode<K,V> last = root;
@@ -152,19 +157,12 @@ public class AvlTreeImpl {
             return last.key;
         }
 
-        //返回小于等于当前key的数据
         public K floorKey(K key) {
-            if (size == 0) {
+            if (key == null) {
                 return null;
             }
-            AvlNode<K,V> floor = root;
-            while (floor.left != null) {
-                floor = floor.left;
-                if (!(floor.left.key.compareTo(key) > 0)) {
-                    return floor.left.key;
-                }
-            }
-            return null;
+            AvlNode<K, V> lastNoBigNode = findLastNoBigIndex(key);
+            return lastNoBigNode == null ? null : lastNoBigNode.key;
         }
 
         //返回大于当前key的数据
@@ -172,68 +170,45 @@ public class AvlTreeImpl {
             if (size == 0) {
                 return null;
             }
-            AvlNode<K,V> ceiling = root;
-            while (ceiling.right != null) {
-                ceiling = ceiling.right;
-                if (!(ceiling.right.key.compareTo(key) < 0)) {
-                    return ceiling.right.key;
-                }
-            }
-            return null;
+            AvlNode<K, V> lastNoSmallIndex = findLastNoSmallIndex(key);
+            return lastNoSmallIndex == null ? null : lastNoSmallIndex.key;
         }
 
-
-
-
-        private AvlNode<K,V> get(AvlNode<K,V> cur, K key) {
-            if (cur == null){
-                return null;
-            }
-            if (cur.key.compareTo(key) > 0){
-                return get(cur.right, key);
-            }else if (cur.key.compareTo(key) < 0){
-                return get(cur.left, key);
-            }else {
-                return cur;
-            }
-        }
-
-        private AvlNode<K,V> add (AvlNode<K,V> cur, K key, V value) {
+        private AvlNode<K, V> add(AvlNode<K, V> cur, K key, V value) {
             if (cur == null) {
-                return new AvlNode<>(key, value);
+                return new AvlNode<K, V>(key, value);
+            } else {
+                if (key.compareTo(cur.key) < 0) {
+                    cur.left = add(cur.left, key, value);
+                } else {
+                    cur.right = add(cur.right, key, value);
+                }
+                cur.height = Math.max(cur.left != null ? cur.left.height : 0, cur.right != null ? cur.right.height : 0) + 1;
+                return maintain(cur);
             }
-            if (cur.key.compareTo(key) > 0) {
-                cur.left = add(cur.left, cur.key, value);
-            }else {
-                cur.right = add(cur.right, cur.key, value);
-            }
-            return maintain(cur);
         }
+
 
 
         //删除
         private AvlNode<K,V> delete (AvlNode<K,V> cur, K key) {
-            if (cur == null){
-                return null;
-            }
-
-            if (cur.key.compareTo(key) > 0) {
-                cur.left = delete(cur.left, cur.key);
-            }else if (cur.key.compareTo(key) < 0){
-                cur.right = delete(cur.right, cur.key);
+            if (key.compareTo(cur.key) > 0) {
+                cur.right = delete(cur.right, key);
+            } else if (key.compareTo(cur.key) < 0) {
+                cur.left = delete(cur.left, key);
             }else {
 
                 //当前节点既无左节点也无右节点
                 if (cur.left == null && cur.right == null) {
-                    return null;
+                    cur = null;
                 }
                 //当前删除节点无右节点
                 else if (cur.right == null){
-                    return cur.left;
+                    cur = cur.left;
                 }
                 //当前删除节点无左节点
                 else if (cur.left == null) {
-                    return cur.right;
+                    cur = cur.right;
                 }
                 //既有左节点又有右节点
                 else {
@@ -248,6 +223,9 @@ public class AvlTreeImpl {
                     cur = replace;
                 }
             }
+            if (cur != null) {
+                cur.height = Math.max(cur.left != null ? cur.left.height : 0, cur.right != null ? cur.right.height : 0) + 1;
+            }
             return maintain(cur);
         }
 
@@ -255,39 +233,39 @@ public class AvlTreeImpl {
 
         //平衡性调整
         private AvlNode<K,V> maintain(AvlNode<K,V> cur) {
-            AvlNode<K,V> record = cur;
-            if (cur == null || (cur.left == null && cur.right == null)) {
-                return record;
+            if (cur == null) {
+                return null;
             }
-
             int leftHeight = cur.left == null ? 0 : cur.left.height;
             int rightHeight = cur.right == null ? 0 : cur.right.height;
             if (Math.abs(leftHeight - rightHeight) > 1) {
                 //L 型  再次判断 LL或者LR
                 if (leftHeight > rightHeight) {
-                    int leftLeftHeight = cur.left.left == null ? 0 : cur.left.left.height;
-                    int leftRightHeight = cur.left.right == null ? 0 : cur.left.right.height;
+                    int leftLeftHeight = cur.left != null && cur.left.left != null ? cur.left.left.height : 0;
+                    int leftRightHeight = cur.left != null && cur.left.right != null ? cur.left.right.height : 0;
                     //是否 LR
-                    if (leftLeftHeight < leftRightHeight) {
+                    if (leftLeftHeight >= leftRightHeight) {
                         //左旋
+                        cur = rightRotate(cur);
+                    }else {
                         cur.left = leftRotate(cur.left);
+                        cur = rightRotate(cur);
                     }
-                    //统一处理 LL  右旋
-                    record = rightRotate(cur);
                 }else {
                     //R 型  再次判断 RR或者RL
-                    int rightLeftHeight = cur.right.left == null ? 0 : cur.right.left.height;
-                    int rightRightHeight = cur.right.right == null ? 0 : cur.right.right.height;
+                    int rightRightHeight = cur.right != null && cur.right.right != null ? cur.right.right.height : 0;
+                    int rightLeftHeight = cur.right != null && cur.right.left != null ? cur.right.left.height : 0;
                     //是否RL
-                    if (rightRightHeight < rightLeftHeight) {
+                    if (rightRightHeight >= rightLeftHeight) {
                         //右旋
+                        cur = leftRotate(cur);
+                    }else {
                         cur.right = rightRotate(cur.right);
+                        cur = leftRotate(cur);
                     }
-                    //统一处理 RR 左旋
-                    record = leftRotate(cur);
                 }
             }
-            return record;
+            return cur;
         }
 
         //左旋
@@ -300,6 +278,7 @@ public class AvlTreeImpl {
             return record;
         }
 
+
         //右旋
         private AvlNode<K,V> rightRotate(AvlNode<K,V> cur) {
             AvlNode<K,V> record = cur.left;
@@ -309,5 +288,6 @@ public class AvlTreeImpl {
             record.height = Math.max(cur.height,record.left == null ? 0 : record.left.height) + 1;
             return record;
         }
+
     }
 }
